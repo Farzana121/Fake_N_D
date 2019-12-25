@@ -6,6 +6,7 @@ from nltk import RegexpTokenizer
 import re
 import numpy as np
 from sklearn.model_selection import train_test_split
+from sklearn.neural_network import MLPClassifier
 
 #Reading Datasets with word tokenization
 def generator(input_document, cl_output, batch_size = 16):
@@ -85,3 +86,5 @@ for doc in document_real_text:
 (X, Y) = generator(document, classification, len(document))
 
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size =  0.2)
+model = MLPClassifier(hidden_layer_sizes = (64,32,16,8), max_iter=500)
+model.fit(X_train, y_train)
