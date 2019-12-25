@@ -101,6 +101,7 @@ document, classification = shuffle_training_set(document, classification)
 (X, Y) = generator(document, classification, len(document))
 
 '''
+# K-Fold Cross Validation
 kf = KFold(n_splits=4)
 modelMLP = MLPClassifier(hidden_layer_sizes = (64,32,16,8), max_iter=500)
 for trn_i, tst_i in kf.split(X):
