@@ -4,8 +4,20 @@ from bengali_stemmer.rafikamal2014.parser import RafiStemmer
 from nltk.corpus.reader import PlaintextCorpusReader
 from nltk import RegexpTokenizer
 import re
+import numpy as np
+from sklearn.model_selection import train_test_split
 
 #Reading Datasets with word tokenization
+def generator(input_document, cl_output, batch_size = 16):
+    #while True:
+    x = np.zeros((batch_size, len(vocab_set)), dtype=np.bool)
+    y = np.zeros(batch_size, dtype=np.bool)
+    for i in range(batch_size):
+        for w in input_document[i]:
+            x[i, word_indices[w]] = 1
+        y[i] = bool(cl_output[i])
+        #yield x, y
+    return (x, y)
 
 dir_fake = 'f:/DataSetFake/'
 dir_real = 'f:/DataSetReal/'
@@ -28,36 +40,48 @@ for file in corpus_real.fileids():
 corpus_real_text = [[re.sub(r'\d+', ' ', word) for word in document]for document in corpus_real_text]
 
 #Stemming for dimensionality reduction and removing hanging single/double letters
+
 vocab = []
 my_stemmer = RafiStemmer()
+
+document_fake_text = []
 for doc in corpus_fake_text:
-    for index, word in enumerate(doc):
+    doc_fake = []
+    for word in doc:
         stemmed_word = my_stemmer.stem_word(word)
-        if len(stemmed_word) < 3:
-            del(doc[index])
-        else:
-            doc[index] = stemmed_word
-            vocab.append(stemmed_word)
+        if len(stemmed_word) < 2:
+            continue
+        doc_fake.append(stemmed_word)
+        vocab.append(stemmed_word)
+    document_fake_text.append(doc_fake)
 
+document_real_text = []
 for doc in corpus_real_text:
-    for index, word in enumerate(doc):
+    doc_real = []
+    for word in doc:
         stemmed_word = my_stemmer.stem_word(word)
-        if len(stemmed_word) < 3:
-            del(doc[index])
-        else:
-            doc[index] = stemmed_word
-            vocab.append(stemmed_word)
-#Total data size 14,675 words after stemming and dropping small words
-#Should use Word-Embedding here
-vocab.sort()
-vocab_set = set(vocab)
-#Total unique words 4,580
+        if len(stemmed_word) < 2:
+            continue
+        doc_real.append(stemmed_word)
+        vocab.append(stemmed_word)
+    document_real_text.append(doc_real)
 
+# Number of input document 662
+# Number of words in document 1,34,606 after stemming and dropping small words
+vocab_set = sorted(set(vocab))
+#Total unique words 14,210
+#Building Dictionary
+word_indices = dict((c, i) for i, c in enumerate(vocab_set))
+indices_word = dict((i, c) for i, c in enumerate(vocab_set))
 
-f_out = io.open('f:/out.txt', 'w', encoding='utf-8')
-#my_stemmer.stem_word('করছে')
-'''
-for words in c_words:
-    f_out.write(my_stemmer.stem_word(words) + '\t')
-f_out.close()
-'''
+document = document_fake_text + document_real_text
+classification = []
+for doc in document_fake_text:
+    classification.append(0)
+
+for doc in document_real_text:
+    classification.append(1)
+
+(X, Y) = generator(document, classification, len(document))
+
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size =  0.2)

@@ -1,0 +1,1 @@
+This folder contains all the codes since before Word2Vec model was added
