@@ -13,6 +13,8 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
+import pickle
+from scipy.stats import ttest_ind
 
 def generator(input_document, cl_output, batch_size = 16):
     #generator not implemented yet
@@ -23,6 +25,14 @@ def generator(input_document, cl_output, batch_size = 16):
             x[i, word_indices[w]] = 1
         y[i] = bool(cl_output[i])
     return (x, y)
+
+def vectorizer(input_document):
+    #generator not implemented yet
+    x = np.zeros((len(input_document), len(vocab_set)), dtype=np.bool)
+    for i in range(len(input_document)):
+        for w in input_document[i]:
+            x[i, word_indices[w]] = 1
+    return x
 
 def shuffle_training_set(doc_orig, class_orig):
     # shuffle at unison
@@ -100,6 +110,10 @@ for doc in document_real_text:
 document, classification = shuffle_training_set(document, classification)
 (X, Y) = generator(document, classification, len(document))
 
+real_vec = vectorizer(document_real_text)
+fake_vec = vectorizer(document_fake_text)
+stat, p = ttest_ind(real_vec, fake_vec)
+print('Stat=%.3f, p=%.3f' %(stat, p))
 '''
 # K-Fold Cross Validation
 kf = KFold(n_splits=4)
@@ -108,22 +122,22 @@ for trn_i, tst_i in kf.split(X):
     modelMLP.fit(X[trn_i], Y[trn_i])
     print(modelMLP.score(X[tst_i], Y[tst_i]))
 '''
-#model = LogisticRegression(max_iter=200)
-#model = LinearDiscriminantAnalysis()
-#model = GaussianNB()
-#model = KNeighborsClassifier(n_neighbors=2)
-#model = DecisionTreeClassifier()
 
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size =  0.2)
+chosen_models = {}
+#chosen_models['f:/Fake_N_D/MLPC_model.sav'] = MLPClassifier(hidden_layer_sizes=(64,32,16,8), max_iter=500)
+chosen_models['f:/Fake_N_D/LogiRegr.sav'] = LogisticRegression(max_iter=200)
+#chosen_models['f:/Fake_N_D/LinDisc.sav'] = LinearDiscriminantAnalysis()
+chosen_models['f:/Fake_N_D/GausNB'] = GaussianNB()
+#Random Forest
+chosen_models['f:/Fake_N_D/KNeiCls'] = KNeighborsClassifier(n_neighbors=2)
+chosen_models['f:/Fake_N_D/DTree'] = DecisionTreeClassifier()
 
-model = DecisionTreeClassifier()
-model.fit(X_train, y_train)
-
-predictions = model.predict(X_train)
-print("Training Report")
-print(classification_report(predictions, y_train))
-
-predictions = model.predict(X_test)
-print("Test Report")
-print(classification_report(predictions, y_test))
-
+for fname, model in chosen_models.items():
+    print("working on " + fname)
+    model.fit(X_train, y_train)
+    predictions = model.predict(X_test)
+    print(classification_report(predictions, y_test))
+    print("*************")
+    pickle.dump(model, open(fname, 'wb'))
+    

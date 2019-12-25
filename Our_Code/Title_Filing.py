@@ -3,7 +3,7 @@
 Created on Wed Dec 25 10:36:01 2019
 Creates Data Set as files from CSV
 @author: Dell
-Reads from csv, writes the title and body texts in separate files
+reads titles from csv and prepares files
 """
 import csv
 
@@ -14,8 +14,8 @@ with open('f:/dataset_fake.csv', encoding='utf-8') as csv_file:
         if line_count == 0:
             line_count += 1
         else:
-            out_file = open(f'f:/DataSetFake/{row[0]}.txt', 'w', encoding='utf-8')
-            out_file.write(row[1] + '\n' + row[2])
+            out_file = open(f'f:/TitleFake/{row[0]}.txt', 'w', encoding='utf-8')
+            out_file.write(row[1])
             line_count += 1
     print(f'total {line_count}.')
 
@@ -26,7 +26,7 @@ with open('f:/dataset_real.csv', encoding='utf-8') as csv_file:
         if line_count == 0:
             line_count += 1
         else:
-            out_file = open(f'f:/DataSetReal/{row[0]}.txt', 'w', encoding='utf-8')
-            out_file.write(row[1] + '\n' + row[2])
+            out_file = open(f'f:/TitleReal/{row[0]}.txt', 'w', encoding='utf-8')
+            out_file.write(row[1])
             line_count += 1
     print(f'total {line_count}.')
