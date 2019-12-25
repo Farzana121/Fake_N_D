@@ -7,6 +7,7 @@ import re
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import classification_report
 
 #Reading Datasets with word tokenization
 def generator(input_document, cl_output, batch_size = 16):
@@ -85,6 +86,18 @@ for doc in document_real_text:
 
 (X, Y) = generator(document, classification, len(document))
 
-X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size =  0.2)
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size =  0.1)
 model = MLPClassifier(hidden_layer_sizes = (64,32,16,8), max_iter=500)
 model.fit(X_train, y_train)
+
+predictions = model.predict(X_train)
+print("Report")
+print(classification_report(predictions, y_train))
+
+predictions = model.predict(X_test)
+print("Report")
+print(classification_report(predictions, y_test))
+
+
+
+
