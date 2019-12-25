@@ -5,19 +5,18 @@ from nltk import RegexpTokenizer
 import re
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.neural_network import MLPClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
-from sklearn.model_selection import KFold
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+#from sklearn.model_selection import KFold
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
 import pickle
-from scipy.stats import ttest_ind
+#from scipy.stats import ttest_ind
 
-def generator(input_document, cl_output, batch_size = 16):
-    #generator not implemented yet
+def generator(input_document, cl_output, batch_size):
+    #generator not implemented yet, loading full training set
     x = np.zeros((batch_size, len(vocab_set)), dtype=np.bool)
     y = np.zeros(batch_size, dtype=np.bool)
     for i in range(batch_size):
@@ -35,7 +34,6 @@ def vectorizer(input_document):
     return x
 
 def shuffle_training_set(doc_orig, class_orig):
-    # shuffle at unison
     tmp_sentences = []
     tmp_class = []
     for i in np.random.permutation(len(doc_orig)):
@@ -70,7 +68,7 @@ corpus_real_text = [[re.sub(r'\d+', ' ', word) for word in document]for document
 vocab = []
 my_stemmer = RafiStemmer()
 
-document_fake_text = []
+document_fake = []
 for doc in corpus_fake_text:
     doc_fake = []
     for word in doc:
@@ -79,9 +77,9 @@ for doc in corpus_fake_text:
             continue
         doc_fake.append(stemmed_word)
         vocab.append(stemmed_word)
-    document_fake_text.append(doc_fake)
+    document_fake.append(doc_fake)
 
-document_real_text = []
+document_real = []
 for doc in corpus_real_text:
     doc_real = []
     for word in doc:
@@ -90,30 +88,25 @@ for doc in corpus_real_text:
             continue
         doc_real.append(stemmed_word)
         vocab.append(stemmed_word)
-    document_real_text.append(doc_real)
+    document_real.append(doc_real)
 
-# Number of input document 662
-# Number of words in document 1,34,606 after stemming and dropping small words
+# Number of input document 1384
+# Number of words in document 1,54,407 after stemming and dropping small words
 vocab_set = sorted(set(vocab))
-#Total unique words 14,210
+#Total unique words 14,392
 #Building Dictionary
 word_indices = dict((c, i) for i, c in enumerate(vocab_set))
-indices_word = dict((i, c) for i, c in enumerate(vocab_set))
 
-document = document_fake_text + document_real_text
+document = document_fake + document_real
 classification = []
-for doc in document_fake_text:
+for doc in document_fake:
     classification.append(0)
-for doc in document_real_text:
+for doc in document_real:
     classification.append(1)
 
 document, classification = shuffle_training_set(document, classification)
 (X, Y) = generator(document, classification, len(document))
 
-real_vec = vectorizer(document_real_text)
-fake_vec = vectorizer(document_fake_text)
-stat, p = ttest_ind(real_vec, fake_vec)
-print('Stat=%.3f, p=%.3f' %(stat, p))
 '''
 # K-Fold Cross Validation
 kf = KFold(n_splits=4)
@@ -125,13 +118,12 @@ for trn_i, tst_i in kf.split(X):
 
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size =  0.2)
 chosen_models = {}
-#chosen_models['f:/Fake_N_D/MLPC_model.sav'] = MLPClassifier(hidden_layer_sizes=(64,32,16,8), max_iter=500)
+
 chosen_models['f:/Fake_N_D/LogiRegr.sav'] = LogisticRegression(max_iter=200)
-#chosen_models['f:/Fake_N_D/LinDisc.sav'] = LinearDiscriminantAnalysis()
-chosen_models['f:/Fake_N_D/GausNB'] = GaussianNB()
-#Random Forest
-chosen_models['f:/Fake_N_D/KNeiCls'] = KNeighborsClassifier(n_neighbors=2)
-chosen_models['f:/Fake_N_D/DTree'] = DecisionTreeClassifier()
+chosen_models['f:/Fake_N_D/GausNB.sav'] = GaussianNB()
+chosen_models['f:/Fake_N_D/RanFor.sav'] = RandomForestClassifier(max_depth=2, random_state=0)
+chosen_models['f:/Fake_N_D/KNeiCls.sav'] = KNeighborsClassifier(n_neighbors=2)
+chosen_models['f:/Fake_N_D/DTree.sav'] = DecisionTreeClassifier()
 
 for fname, model in chosen_models.items():
     print("working on " + fname)
