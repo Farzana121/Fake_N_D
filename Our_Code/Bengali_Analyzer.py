@@ -13,7 +13,6 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 import pickle
-#from scipy.stats import ttest_ind
 
 def generator(input_document, cl_output, batch_size):
     #generator not implemented yet, loading full training set
@@ -96,6 +95,10 @@ vocab_set = sorted(set(vocab))
 #Total unique words 14,392
 #Building Dictionary
 word_indices = dict((c, i) for i, c in enumerate(vocab_set))
+vocab_file =  open('f:/Minhaz/GitHubRepo/Fake_N_D/Our_Code/vocabulary.txt', 'w', encoding='utf-8')
+for words in vocab_set:
+    vocab_file.write(words + '\n')
+vocab_file.close()
 
 document = document_fake + document_real
 classification = []

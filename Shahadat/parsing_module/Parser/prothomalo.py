@@ -1,19 +1,12 @@
 from bs4 import BeautifulSoup
-
 from Parser.scrapper import Scrapper
 from dateutil.parser import parse
 import json
-import datetime
-
 import re
 
-
 # url = 'https://www.prothomalo.com/bangladesh/article/1623496'
-
-
 # url = 'https://en.prothomalo.com/sports/news/204652/WIndies-get-one-day-series-win-in-five-years'
 # url = 'https://www.prothomalo.com/bangladesh/article/1623509/%E0%A6%A8%E0%A6%BF%E0%A6%B7%E0%A7%87%E0%A6%A7%E0%A6%BE%E0%A6%9C%E0%A7%8D%E0%A6%9E%E0%A6%BE-%E0%A6%85%E0%A6%AE%E0%A6%BE%E0%A6%A8%E0%A7%8D%E0%A6%AF-%E0%A6%95%E0%A6%B0%E0%A7%87-%E0%A6%A6%E0%A7%8C%E0%A6%B2%E0%A6%A4%E0%A6%A6%E0%A6%BF%E0%A7%9F%E0%A6%BE-%E0%A6%AA%E0%A6%BE%E0%A6%9F%E0%A7%81%E0%A6%B0%E0%A6%BF%E0%A7%9F%E0%A6%BE-%E0%A6%A8%E0%A7%8C%E0%A6%AA%E0%A6%A5%E0%A7%87'
-
 
 class Prothomalo:
     def __init__(self, url):

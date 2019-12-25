@@ -1,9 +1,5 @@
-import json
 import logging
 import time
-
-import requests
-from tqdm import tqdm
 from newspaper import Article
 from Parser.util import create_dir
 import random
