@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import io
 from bengali_stemmer.rafikamal2014.parser import RafiStemmer
 from nltk.corpus.reader import PlaintextCorpusReader
 from nltk import RegexpTokenizer
@@ -7,20 +6,35 @@ import re
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
+from sklearn.model_selection import KFold
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
 
-#Reading Datasets with word tokenization
 def generator(input_document, cl_output, batch_size = 16):
-    #while True:
+    #generator not implemented yet
     x = np.zeros((batch_size, len(vocab_set)), dtype=np.bool)
     y = np.zeros(batch_size, dtype=np.bool)
     for i in range(batch_size):
         for w in input_document[i]:
             x[i, word_indices[w]] = 1
         y[i] = bool(cl_output[i])
-        #yield x, y
     return (x, y)
 
+def shuffle_training_set(doc_orig, class_orig):
+    # shuffle at unison
+    tmp_sentences = []
+    tmp_class = []
+    for i in np.random.permutation(len(doc_orig)):
+        tmp_sentences.append(doc_orig[i])
+        tmp_class.append(class_orig[i])
+    
+    return (tmp_sentences, tmp_class)
+
+#Reading Datasets with word tokenization
 dir_fake = 'f:/DataSetFake/'
 dir_real = 'f:/DataSetReal/'
 
@@ -80,24 +94,35 @@ document = document_fake_text + document_real_text
 classification = []
 for doc in document_fake_text:
     classification.append(0)
-
 for doc in document_real_text:
     classification.append(1)
 
+document, classification = shuffle_training_set(document, classification)
 (X, Y) = generator(document, classification, len(document))
 
-X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size =  0.1)
-model = MLPClassifier(hidden_layer_sizes = (64,32,16,8), max_iter=500)
+'''
+kf = KFold(n_splits=4)
+modelMLP = MLPClassifier(hidden_layer_sizes = (64,32,16,8), max_iter=500)
+for trn_i, tst_i in kf.split(X):
+    modelMLP.fit(X[trn_i], Y[trn_i])
+    print(modelMLP.score(X[tst_i], Y[tst_i]))
+'''
+#model = LogisticRegression(max_iter=200)
+#model = LinearDiscriminantAnalysis()
+#model = GaussianNB()
+#model = KNeighborsClassifier(n_neighbors=2)
+#model = DecisionTreeClassifier()
+
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size =  0.2)
+
+model = DecisionTreeClassifier()
 model.fit(X_train, y_train)
 
 predictions = model.predict(X_train)
-print("Report")
+print("Training Report")
 print(classification_report(predictions, y_train))
 
 predictions = model.predict(X_test)
-print("Report")
+print("Test Report")
 print(classification_report(predictions, y_test))
-
-
-
 
