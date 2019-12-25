@@ -4,35 +4,56 @@ from bengali_stemmer.rafikamal2014.parser import RafiStemmer
 from nltk.corpus.reader import PlaintextCorpusReader
 from nltk import RegexpTokenizer
 import re
-import csv
 
-with open('f:/dataset_fake.csv', encoding='utf-8') as csv_file:
-    csv_reader = csv.reader(csv_file, delimiter=',')
-    line_count = 0
-    for row in csv_reader:
-        if line_count == 0:
-            print(f'column names are {", ".join(row)}')
-            line_count += 1
-        else:
-            print(f'\t{row[0]} dsfjksd {row[1]}')
-            line_count += 1
-        print(f'total {line_count}.')
+#Reading Datasets with word tokenization
 
-my_stemmer = RafiStemmer()
+dir_fake = 'f:/DataSetFake/'
+dir_real = 'f:/DataSetReal/'
 
-directory = 'F:/Minhaz/GitHubRepo/Fake_N_D/Our_Code/'
-corpus_dir = directory + 'corpus/'
 w_t = RegexpTokenizer("[\u0980-\u09FF']+")
-corpus = PlaintextCorpusReader(corpus_dir, r'.*\.txt', word_tokenizer=w_t)
+corpus_fake = PlaintextCorpusReader(dir_fake, r'.*\.txt', word_tokenizer=w_t)
+corpus_real = PlaintextCorpusReader(dir_real, r'.*\.txt', word_tokenizer=w_t)
 
-corpus_text = []
+corpus_fake_text = []
+corpus_real_text = []
 
-for file in corpus.fileids():
-    corpus_text.append([corpus.words(file)])
-corpus_text = [[re.sub(r'\d+', '', word) for word in document]for document in corpus_text]
+#Removing Numbers
 
-#vectorizer = TfidfVectorizer()
-#response = vectorizer.fit_transform(corpus_text)
+for file in corpus_fake.fileids():
+    corpus_fake_text.append(corpus_fake.words(file))
+corpus_fake_text = [[re.sub(r'\d+', ' ', word) for word in document]for document in corpus_fake_text]
+
+for file in corpus_real.fileids():
+    corpus_real_text.append(corpus_real.words(file))
+corpus_real_text = [[re.sub(r'\d+', ' ', word) for word in document]for document in corpus_real_text]
+
+#Stemming for dimensionality reduction and removing hanging single/double letters
+vocab = []
+my_stemmer = RafiStemmer()
+for doc in corpus_fake_text:
+    for index, word in enumerate(doc):
+        stemmed_word = my_stemmer.stem_word(word)
+        if len(stemmed_word) < 3:
+            del(doc[index])
+        else:
+            doc[index] = stemmed_word
+            vocab.append(stemmed_word)
+
+for doc in corpus_real_text:
+    for index, word in enumerate(doc):
+        stemmed_word = my_stemmer.stem_word(word)
+        if len(stemmed_word) < 3:
+            del(doc[index])
+        else:
+            doc[index] = stemmed_word
+            vocab.append(stemmed_word)
+#Total data size 14,675 words after stemming and dropping small words
+#Should use Word-Embedding here
+vocab.sort()
+vocab_set = set(vocab)
+#Total unique words 4,580
+
+
 f_out = io.open('f:/out.txt', 'w', encoding='utf-8')
 #my_stemmer.stem_word('করছে')
 '''
